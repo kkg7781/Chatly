@@ -6,7 +6,7 @@ try {
     if(!token){
         return res.status(401).json({message:"No token provided"})
     }
-    const decodedToken=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+    const decodedToken=jwt.verify(token,process.env.JWT_SECRET)
     if(!decodedToken){
         return res.status(401).json({message:"Invalid authentication"})
     }

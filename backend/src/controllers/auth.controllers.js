@@ -1,6 +1,8 @@
 import User from "../models/user.models.js";
 import bcrypt from "bcryptjs"
 import { generateToken } from "../lib/utils.js";
+import  cloudinary from "../lib/cloudinary.js";
+import fs from "fs";
 
 
 export const signup=async(req,res)=>{
@@ -95,5 +97,36 @@ export const logout=async(req, res)=>{
     res.status(200).json({message:"Logged Out Successfully"})
 }
 export const updateProfile=async(req, res)=>{
-    
+
+    // first upload file tempoararrily in database in public temp .gitkeep then upload on cloudinary
+    try {
+        
+if(!req.file){
+     return res.status(400).json({ message: "Profile pic is required" });
+}
+// now upload in cloudinary
+ const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "chatly/profile_pics",
+      resource_type: "image",
+    });
+    //delete temp file
+     fs.unlinkSync(req.file.path);
+     //user profile updated in database
+     const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePic: result.secure_url },
+      { new: true }
+    ).select("-password");
+      return res.status(200).json({
+      id: updatedUser._id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      profilePic: updatedUser.profilePic,
+    });
+
+    } catch (error) {
+        console.error("Error updating profile picture:", error);
+    return res.status(500).json({ message: "Failed to update profile picture" });
+        
+    }
 }
