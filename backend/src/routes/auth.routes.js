@@ -17,4 +17,5 @@ router.put(
 );
 router.get("/check", verifyJWT,(req,res)=>{return res.status(200).json(req.user)})
 
+
 export default router
