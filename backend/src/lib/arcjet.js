@@ -1,4 +1,4 @@
-import arcjet, { shield, detectBot, slidingWindow} from "@arcjet/node";
+/*import arcjet, { shield, detectBot, slidingWindow} from "@arcjet/node";
 import { isSpoofedBot } from "@arcjet/inspect";
 
 const aj = arcjet({
@@ -30,4 +30,4 @@ const aj = arcjet({
  )
   ],
 });
-export default aj
+export default aj */
