@@ -48,7 +48,7 @@ export const getMessagesByUserId=async(req,res)=>{
    try {
      const {text}=req.body
      const image=req.file  // when using multer remember that image will be there in req.file not req.body
-     const {id: receiverId}=req.params
+     const { receiverId}=req.params
      const senderId=req.user._id
 
      //few checks added
