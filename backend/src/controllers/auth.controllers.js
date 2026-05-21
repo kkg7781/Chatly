@@ -86,16 +86,22 @@ export const login =async(req, res)=>{
 
     } catch (error) {
         console.error("Error in login controller", error)
-        res.status(500).json({messgae:"Internal Server Error"})
+        res.status(500).json({message:"Internal Server Error"})
         
     }
 
 
 }
-export const logout=async(req, res)=>{
-    res.cookie("jwt", "", {maxAge :0});
-    res.status(200).json({message:"Logged Out Successfully"})
-}
+export const logout = async (req, res) => {
+  res.cookie("jwt", "", {
+    maxAge: 0,
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  res.status(200).json({ message: "Logged Out Successfully" });
+};
 export const updateProfile=async(req, res)=>{
 
     // first upload file tempoararrily in database in public temp .gitkeep then upload on cloudinary
