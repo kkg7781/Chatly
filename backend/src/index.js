@@ -12,7 +12,11 @@ dotenv.config();
 //const app=express();
 const PORT= process.env.PORT || 3000
 app.use(express.json({limit :"5mb"})) //middleware to convert incoming json data to javaScript object as express cant understand json
-app.use(cors({origin:process.env.CLIENT_URL, credentials:true}))
+app.use(cors({origin:[process.env.CLIENT_URL,
+    
+]
+,
+     credentials:true}))
 app.use(cookieParser())
 //console.log("API KEY:", process.env.CLOUDINARY_API_KEY);
 app.use("/auth", authRoutes)
