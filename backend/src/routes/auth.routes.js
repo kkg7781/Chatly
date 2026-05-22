@@ -8,7 +8,7 @@ const router=express.Router();
 router.post("/signup",signup)
 router.post("/login",login)
 // protected routes
-router.post("/logout",verifyJWT, logout)
+router.post("/logout", logout)
 router.put(
   "/profile",
   verifyJWT,

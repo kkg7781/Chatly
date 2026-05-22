@@ -15,11 +15,6 @@ router.get("/contacts", verifyJWT, getAllContacts);
 router.get("/chats", verifyJWT, getChatPartners);
 router.get("/:id", verifyJWT, getMessagesByUserId);
 
-router.post(
-  "/send/:receiverId",
-  verifyJWT,
-  upload.single("image"),
-  sendMessages
-);
+router.post("/send/:receiverId", verifyJWT, sendMessages);
 
 export default router;

@@ -8,33 +8,32 @@ function MessageInput() {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
-  const [imageFile, setImageFile] = useState(null); // ✅ store actual File
 
   const fileInputRef = useRef(null);
 
   const { sendMessage, isSoundEnabled } = useChatStore();
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !imageFile) return; // ✅ check File object
+
+    if (!text.trim() && !imagePreview) return;
 
     if (isSoundEnabled) playRandomKeyStrokeSound();
 
-    // ✅ pass actual File to sendMessage
-    sendMessage({
+    await sendMessage({
       text: text.trim(),
-      image: imageFile,
+      image: imagePreview, // send base64 string, not File object
     });
 
-    // clear all states
     setText("");
     setImagePreview(null);
-    setImageFile(null);
+
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -42,17 +41,18 @@ function MessageInput() {
       return;
     }
 
-    setImageFile(file); // ✅ store the File object for sending
-
-    // preview only (Base64 string)
     const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result);
+
+    reader.onloadend = () => {
+      setImagePreview(reader.result); // base64 string
+    };
+
     reader.readAsDataURL(file);
   };
 
   const removeImage = () => {
     setImagePreview(null);
-    setImageFile(null); // ✅ also clear the File
+
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -109,7 +109,7 @@ function MessageInput() {
 
         <button
           type="submit"
-          disabled={!text.trim() && !imageFile} // ✅ check File object
+          disabled={!text.trim() && !imagePreview}
           className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg px-4 py-2 font-medium hover:from-cyan-600 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <SendIcon className="w-5 h-5" />

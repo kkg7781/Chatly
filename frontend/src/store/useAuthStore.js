@@ -80,25 +80,28 @@ export const useAuthStore = create((set, get) => ({
   },
 
   logout: async () => {
-    try {
-      localStorage.removeItem("token");
+  try {
+    localStorage.removeItem("token");
 
-      await axiosInstance.post("/auth/logout");
+    get().disconnectSocket();
 
-      set({ authUser: null, onlineUsers: [] });
+    set({ authUser: null, onlineUsers: [] });
 
-      toast.success("Logged out successfully");
+    // Try backend logout, but don't let it break frontend logout
+    await axiosInstance.post("/auth/logout").catch(() => {});
 
-      get().disconnectSocket();
-    } catch (error) {
-      localStorage.removeItem("token");
-      set({ authUser: null, onlineUsers: [] });
+    toast.success("Logged out successfully");
+  } catch (error) {
+    localStorage.removeItem("token");
 
-      toast.error("Error logging out");
-      console.log("Logout error:", error);
-    }
-  },
+    get().disconnectSocket();
 
+    set({ authUser: null, onlineUsers: [] });
+
+    toast.success("Logged out locally");
+    console.log("Logout error:", error);
+  }
+},
   updateProfile: async (data) => {
     try {
       const res = await axiosInstance.put("/auth/update-profile", data);
