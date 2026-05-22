@@ -1,23 +1,38 @@
-import jwt from "jsonwebtoken"
-import User from "../models/user.models.js"
-export const verifyJWT= async(req,res,next)=>{
-try {
-    const token=req.cookies?.jwt
-    if(!token){
-        return res.status(401).json({message:"No token provided"})
+import jwt from "jsonwebtoken";
+import User from "../models/user.models.js";
+
+export const verifyJWT = async (req, res, next) => {
+  try {
+    let token = req.cookies?.jwt;
+
+    // fallback: read token from Authorization header
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
     }
-    const decodedToken=jwt.verify(token,process.env.JWT_SECRET)
-    if(!decodedToken){
-        return res.status(401).json({message:"Invalid authentication"})
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
     }
-    const user= await User.findById(decodedToken.userId).select("-password")
-    if(!user){
-          return res.status(401).json({message:"Invalid Access Token"})
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decodedToken) {
+      return res.status(401).json({ message: "Invalid authentication" });
     }
-    req.user=user;
+
+    const user = await User.findById(decodedToken.userId).select("-password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid Access Token" });
+    }
+
+    req.user = user;
     next();
-} catch (error) {
-    console.log("Error in authentication middleware", error.message)
-    return res.status(500).json({message:"Internal Server Error"})
-}
-}
+  } catch (error) {
+    console.log("Error in authentication middleware", error.message);
+
+    return res.status(401).json({
+      message: "Invalid or expired token",
+    });
+  }
+};

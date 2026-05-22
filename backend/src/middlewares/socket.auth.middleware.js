@@ -2,36 +2,40 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.models.js";
 import dotenv from "dotenv";
 
-dotenv.config(); // load .env variables
+dotenv.config();
 
 export const socketAuthMiddleware = async (socket, next) => {
   try {
-    // extract token from http-only cookies
-    const token = socket.handshake.headers.cookie
+    // 1. Try token from cookies
+    let token = socket.handshake.headers.cookie
       ?.split("; ")
       .find((row) => row.startsWith("jwt="))
       ?.split("=")[1];
+
+    // 2. Fallback: try token from socket auth
+    if (!token && socket.handshake.auth?.token) {
+      token = socket.handshake.auth.token;
+    }
 
     if (!token) {
       console.log("Socket connection rejected: No token provided");
       return next(new Error("Unauthorized - No Token Provided"));
     }
 
-    // verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     if (!decoded) {
       console.log("Socket connection rejected: Invalid token");
       return next(new Error("Unauthorized - Invalid Token"));
     }
 
-    // find user from DB
     const user = await User.findById(decoded.userId).select("-password");
+
     if (!user) {
       console.log("Socket connection rejected: User not found");
       return next(new Error("User not found"));
     }
 
-    // attach user info to socket
     socket.user = user;
     socket.userId = user._id.toString();
 
